@@ -20,6 +20,11 @@ export class PostRepositoryImpl implements PostRepository {
 
   async getAllByDatePaginated (options: CursorPagination): Promise<PostDTO[]> {
     const posts = await this.db.post.findMany({
+      where: {
+        author: {
+          isPrivate: false
+        }
+      },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
