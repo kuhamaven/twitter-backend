@@ -65,13 +65,28 @@ export class PostRepositoryImpl implements PostRepository {
     })
   }
 
-  async getById (postId: string): Promise<PostDTO | null> {
+  async getById (userId: string, postId: string): Promise<PostDTO | null> {
     const post = await this.db.post.findUnique({
       where: {
         id: postId
+      },
+      include: {
+        author: {
+          include: {
+            followers: true
+          }
+        }
       }
     })
-    return (post != null) ? new PostDTO(post) : null
+
+    // If the post is not found, return null
+    if (!post) return null
+
+    // Check if the post is public or if the user follows the author
+    const canUserSeePost = !post.author.isPrivate || post.author.followers.some(follower => follower.followerId === userId)
+
+    // Otherwise, return the post wrapped in PostDTO
+    return canUserSeePost ? new PostDTO(post) : null
   }
 
   async getByAuthorId (authorId: string): Promise<PostDTO[]> {
