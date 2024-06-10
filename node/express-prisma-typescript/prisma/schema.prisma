@@ -67,6 +67,10 @@ model Post {
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
   reactions Reaction[] @relation(name: "reactions")
+
+  parent Post? @relation("CommentToPost", fields: [parentId], references: [id]) // Self-referential relationship for comments
+  comments Post[] @relation("CommentToPost") // Self-referential relationship for comments
+  parentId String? @db.Uuid // Self-referential field for comments
 }
 
 model Reaction {

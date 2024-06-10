@@ -166,6 +166,50 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
 
 /**
  * @swagger
+ * /api/post/comment/{postId}:
+ *   post:
+ *     summary: Comment on a post
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the post to comment on
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreatePostInputDTO'
+ *     responses:
+ *       201:
+ *         description: Successfully created the comment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PostDTO'
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Post not found or User can't comment on that post
+ *       500:
+ *         description: Internal server error
+ */
+postRouter.post('/comment/:postId', BodyValidation(CreatePostInputDTO), async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const data = req.body
+  const { postId } = req.params
+
+  const post = await service.commentPost(userId, postId, data)
+
+  return res.status(HttpStatus.CREATED).json(post)
+})
+
+/**
+ * @swagger
  * /api/post/{postId}:
  *   delete:
  *     summary: Delete a post by ID

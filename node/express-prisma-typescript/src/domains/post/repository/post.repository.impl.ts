@@ -18,6 +18,19 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
+  async comment (userId: string, postId: string, data: CreatePostInputDTO): Promise<PostDTO | null> {
+    const parent = await this.getById(userId, postId)
+    if (!parent) return null
+    const post = await this.db.post.create({
+      data: {
+        authorId: userId,
+        parentId: parent.id,
+        ...data
+      }
+    })
+    return new PostDTO(post)
+  }
+
   async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {
     const posts = await this.db.post.findMany({
       where: {
