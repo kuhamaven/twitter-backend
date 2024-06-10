@@ -13,6 +13,34 @@ export const userRouter = Router()
 // Use dependency injection
 const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
 
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get user recommendations
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Limit the number of users
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *         description: Skip a number of users
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user recommendations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UserViewDTO'
+ *       500:
+ *         description: Internal server error
+ */
 userRouter.get('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { limit, skip } = req.query as Record<string, string>
@@ -22,6 +50,21 @@ userRouter.get('/', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(users)
 })
 
+/**
+ * @swagger
+ * /api/users/me:
+ *   get:
+ *     summary: Get current user
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved current user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ExtendedUserDTO'
+ *       500:
+ *         description: Internal server error
+ */
 userRouter.get('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
@@ -30,6 +73,30 @@ userRouter.get('/me', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(user)
 })
 
+/**
+ * @swagger
+ * /api/users/{userId}:
+ *   get:
+ *     summary: Get a user by ID
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to retrieve
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ExtendedUserDTO'
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
 userRouter.get('/:userId', async (req: Request, res: Response) => {
   const { userId: otherUserId } = req.params
 
@@ -38,6 +105,17 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(user)
 })
 
+/**
+ * @swagger
+ * /api/users:
+ *   delete:
+ *     summary: Delete current user
+ *     responses:
+ *       200:
+ *         description: Successfully deleted the user
+ *       500:
+ *         description: Internal server error
+ */
 userRouter.delete('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
