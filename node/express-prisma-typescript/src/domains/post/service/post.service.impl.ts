@@ -33,8 +33,9 @@ export class PostServiceImpl implements PostService {
     return post
   }
 
-  async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
-    return await this.repository.getAllByDatePaginated(userId,options)
+  async getLatestPosts (userId: string, options: CursorPagination, withComments?: boolean): Promise<PostDTO[]> {
+    const useComments = withComments ?? false // Use default value if withComments is not provided
+    return await this.repository.getAllByDatePaginated(userId, useComments, options)
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {

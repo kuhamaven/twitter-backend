@@ -31,33 +31,43 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (userId: string, options: CursorPagination): Promise<PostDTO[]> {
-    const posts = await this.db.post.findMany({
-      where: {
-        OR: [
-          {
-            author: {
-              isPrivate: false
-            }
-          },
-          {
-            author: {
-              isPrivate: true,
-              followers: {
-                some: {
-                  followerId: userId
-                }
+  async getAllByDatePaginated (userId: string, includeComments: boolean, options: CursorPagination): Promise<PostDTO[]> {
+    let whereCondition: any = {
+      OR: [
+        {
+          author: {
+            isPrivate: false
+          }
+        },
+        {
+          author: {
+            isPrivate: true,
+            followers: {
+              some: {
+                followerId: userId
               }
             }
-          },
-          {
-            author: {
-              isPrivate: true,
-              id: userId
-            }
           }
-        ]
-      },
+        },
+        {
+          author: {
+            isPrivate: true,
+            id: userId
+          }
+        }
+      ]
+    }
+
+    // Conditionally add filter for parentId based on includeComments
+    if (!includeComments) {
+      whereCondition = {
+        ...whereCondition,
+        parentId: null // Filter out posts with non-null parentId
+      }
+    }
+
+    const posts = await this.db.post.findMany({
+      where: whereCondition,
       include: {
         author: true
       },
@@ -73,6 +83,7 @@ export class PostRepositoryImpl implements PostRepository {
         }
       ]
     })
+
     return posts.map(post => new PostDTO(post))
   }
 

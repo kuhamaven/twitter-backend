@@ -37,6 +37,11 @@ const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db))
  *         schema:
  *           type: string
  *         description: Get posts after this date
+ *       - in: query
+ *         name: withComments
+ *         schema:
+ *           type: boolean
+ *         description: Include comments in the retrieved posts
  *     responses:
  *       200:
  *         description: Successfully retrieved posts
@@ -51,9 +56,14 @@ const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db))
  */
 postRouter.get('/', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
+  const { withComments } = req.query
   const { limit, before, after } = req.query as Record<string, string>
 
-  const posts = await service.getLatestPosts(userId, { limit: Number(limit), before, after })
+  // Parse the 'withComments' query parameter to a boolean
+  const includeComments = withComments === 'true'
+
+  // Call the service method with the parsed 'includeComments' value
+  const posts = await service.getLatestPosts(userId, { limit: Number(limit), before, after }, includeComments)
 
   return res.status(HttpStatus.OK).json(posts)
 })

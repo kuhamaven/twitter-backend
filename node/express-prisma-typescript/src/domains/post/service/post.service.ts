@@ -5,6 +5,6 @@ export interface PostService {
   commentPost: (userId: string, postId: string, body: CreatePostInputDTO) => Promise<PostDTO | null>
   deletePost: (userId: string, postId: string) => Promise<void>
   getPost: (userId: string, postId: string) => Promise<PostDTO>
-  getLatestPosts: (userId: string, options: { limit?: number, before?: string, after?: string }) => Promise<PostDTO[]>
+  getLatestPosts: (userId: string, options: { limit?: number, before?: string, after?: string }, withComments?: boolean) => Promise<PostDTO[]>
   getPostsByAuthor: (userId: any, authorId: string) => Promise<PostDTO[]>
 }
