@@ -1,6 +1,6 @@
-import { FollowDTO } from '@domains/follower/dto'
+import {ExtendFollowDTO, FollowDTO} from '@domains/follower/dto'
 
 export interface FollowerRepository {
-  follow: (followDto: FollowDTO) => Promise<void>
+  follow: (followDto: FollowDTO) => Promise<ExtendFollowDTO>
   unfollow: (followDto: FollowDTO) => Promise<void>
 }

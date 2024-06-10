@@ -15,9 +15,11 @@ const service: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
 
 /**
  * @swagger
- * /api/users:
+ * /api/user:
  *   get:
  *     summary: Get user recommendations
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: limit
@@ -52,9 +54,11 @@ userRouter.get('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/users/me:
+ * /api/user/me:
  *   get:
  *     summary: Get current user
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully retrieved current user
@@ -75,9 +79,11 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/users/{userId}:
+ * /api/user/{userId}:
  *   get:
  *     summary: Get a user by ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -107,9 +113,11 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/users:
+ * /api/user:
  *   delete:
  *     summary: Delete current user
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully deleted the user

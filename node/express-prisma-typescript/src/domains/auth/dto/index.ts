@@ -19,7 +19,8 @@ export class SignupInputDTO {
   @IsStrongPassword()
     password: string
 
-  isPrivate: boolean
+  @IsNotEmpty()
+    isPrivate: boolean
 
   constructor (email: string, username: string, password: string, isPrivate: boolean) {
     this.email = email

@@ -1,12 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import {PrismaClient} from '@prisma/client'
 
-import { FollowerRepository } from '.'
-import { FollowDTO } from '@domains/follower/dto'
+import {FollowerRepository} from '.'
+import {ExtendFollowDTO, FollowDTO} from '@domains/follower/dto'
 
 export class FollowerRepositoryImpl implements FollowerRepository {
   constructor (private readonly db: PrismaClient) {}
 
-  async follow (followDto: FollowDTO): Promise<void> {
+  async follow (followDto: FollowDTO): Promise<ExtendFollowDTO> {
     // Find the user that is trying to follow
     const user = await this.db.user.findUnique({
       where: {
@@ -24,12 +24,16 @@ export class FollowerRepositoryImpl implements FollowerRepository {
 
     // If the specific follow doesn't exist already, create it
     if (!user.follows.find(follow => follow.followedId === followDto.followedId)) {
-      await this.db.follow.create({
+      const follow = await this.db.follow.create({
         data: {
           ...followDto
         }
       })
+
+      return new ExtendFollowDTO(follow.followerId, follow.followedId, follow.id)
     }
+
+    throw new Error('Follow couldn\'t be created')
   }
 
   async unfollow (followDto: FollowDTO): Promise<void> {

@@ -13,6 +13,21 @@ const swaggerDefinition: SwaggerDefinition = {
       url: 'http://localhost:' + Constants.PORT,
       description: 'Development server'
     }
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token in the format: Bearer <token>'
+      }
+    }
+  },
+  security: [
+    {
+      bearerAuth: []
+    }
   ]
 }
 

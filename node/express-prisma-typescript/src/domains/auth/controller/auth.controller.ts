@@ -16,9 +16,10 @@ const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
 
 /**
  * @swagger
- * /api/signup:
+ * /api/auth/signup:
  *   post:
  *     summary: Register a new user
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -48,9 +49,10 @@ authRouter.post('/signup', BodyValidation(SignupInputDTO), async (req: Request, 
 
 /**
  * @swagger
- * /api/login:
+ * /api/auth/login:
  *   post:
  *     summary: Log in a user
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

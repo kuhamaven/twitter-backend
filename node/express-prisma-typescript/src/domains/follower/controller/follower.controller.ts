@@ -15,9 +15,11 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
 
 /**
  * @swagger
- * /api/follow/{user_id}:
+ * /api/follower/follow/{user_id}:
  *   post:
  *     summary: Follow a user
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: user_id
@@ -25,12 +27,6 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
  *         schema:
  *           type: string
  *         description: ID of the user to follow
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/FollowDTO'
  *     responses:
  *       200:
  *         description: Successfully followed the user
@@ -46,19 +42,24 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
  *         description: Internal server error
  */
 followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
-  const { followerId } = res.locals.context
-  const followedId = req.params.user_id;
+  const { userId } = res.locals.context
+  const followedId = req.params.user_id
 
-  await service.follow(followerId, followedId)
+  console.log(userId)
+  console.log(followedId)
 
-  return res.status(HttpStatus.OK)
+  const followDTO = await service.follow(userId, followedId)
+
+  return res.status(HttpStatus.OK).json(followDTO)
 })
 
 /**
  * @swagger
- * /api/unfollow/{user_id}:
+ * /api/follower/unfollow/{user_id}:
  *   post:
  *     summary: Unfollow a user
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: user_id

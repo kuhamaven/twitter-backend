@@ -16,9 +16,11 @@ const service: PostService = new PostServiceImpl(new PostRepositoryImpl(db))
 
 /**
  * @swagger
- * /api/posts:
+ * /api/post:
  *   get:
  *     summary: Get latest posts
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: limit
@@ -58,9 +60,11 @@ postRouter.get('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/posts/{postId}:
+ * /api/post/{postId}:
  *   get:
  *     summary: Get a post by ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: postId
@@ -91,9 +95,11 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/posts/by_user/{userId}:
+ * /api/post/by_user/{userId}:
  *   get:
  *     summary: Get posts by user
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -126,9 +132,11 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/posts:
+ * /api/post:
  *   post:
  *     summary: Create a new post
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -158,9 +166,11 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
 
 /**
  * @swagger
- * /api/posts/{postId}:
+ * /api/post/{postId}:
  *   delete:
  *     summary: Delete a post by ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: postId
