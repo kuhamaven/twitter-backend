@@ -15,7 +15,7 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
 
 /**
  * @swagger
- * /follow/{user_id}:
+ * /api/follow/{user_id}:
  *   post:
  *     summary: Follow a user
  *     parameters:
@@ -25,9 +25,23 @@ const service: FollowerService = new FollowerServiceImpl(new FollowerRepositoryI
  *         schema:
  *           type: string
  *         description: ID of the user to follow
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/FollowDTO'
  *     responses:
  *       200:
  *         description: Successfully followed the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User followed successfully
  *       500:
  *         description: Internal server error
  */
@@ -42,7 +56,7 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /unfollow/{user_id}:
+ * /api/unfollow/{user_id}:
  *   post:
  *     summary: Unfollow a user
  *     parameters:
@@ -52,9 +66,23 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
  *         schema:
  *           type: string
  *         description: ID of the user to unfollow
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/FollowDTO'
  *     responses:
  *       200:
  *         description: Successfully unfollowed the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User unfollowed successfully
  *       500:
  *         description: Internal server error
  */
