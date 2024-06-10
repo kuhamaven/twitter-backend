@@ -45,9 +45,6 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const followedId = req.params.user_id
 
-  console.log(userId)
-  console.log(followedId)
-
   const followDTO = await service.follow(userId, followedId)
 
   return res.status(HttpStatus.OK).json(followDTO)
