@@ -64,12 +64,6 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
  *         schema:
  *           type: string
  *         description: ID of the user to unfollow
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/FollowDTO'
  *     responses:
  *       200:
  *         description: Successfully unfollowed the user
@@ -85,10 +79,11 @@ followerRouter.post('/follow/:user_id', async (req: Request, res: Response) => {
  *         description: Internal server error
  */
 followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response) => {
-  const { followerId } = res.locals.context
-  const followedId = req.params.user_id;
+  const { userId } = res.locals.context
+  const followedId = req.params.user_id
+  if (userId === followedId) return res.status(HttpStatus.BAD_REQUEST).json("Users can't follow themselves")
 
-  await service.unfollow(followerId, followedId)
+  await service.unfollow(userId, followedId)
 
   return res.status(HttpStatus.OK)
 })

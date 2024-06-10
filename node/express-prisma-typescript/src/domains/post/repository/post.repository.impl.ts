@@ -36,6 +36,12 @@ export class PostRepositoryImpl implements PostRepository {
                 }
               }
             }
+          },
+          {
+            author: {
+              isPrivate: true,
+              id: userId
+            }
           }
         ]
       },

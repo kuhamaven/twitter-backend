@@ -1,4 +1,4 @@
-import {ExtendFollowDTO, FollowDTO} from '@domains/follower/dto'
+import { ExtendFollowDTO } from '@domains/follower/dto'
 
 export interface FollowerService {
   follow: (userId: string, followedId: string) => Promise<ExtendFollowDTO>
