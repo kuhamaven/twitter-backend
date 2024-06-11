@@ -6,7 +6,8 @@ import { PostRepository } from '.'
 import { CreatePostInputDTO, PostDTO } from '../dto'
 
 export class PostRepositoryImpl implements PostRepository {
-  constructor (private readonly db: PrismaClient) {}
+  constructor (private readonly db: PrismaClient) {
+  }
 
   async create (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     const post = await this.db.post.create({
@@ -119,8 +120,8 @@ export class PostRepositoryImpl implements PostRepository {
     return canUserSeePost ? new PostDTO(post) : null
   }
 
-  async getByAuthorId (userId: string, authorId: string): Promise<PostDTO[] | null> {
-    // We check for the user instead of the follow, as we need to see if its private as well as if its followed or not
+  async getByAuthorId (userId: string, comments: boolean, authorId: string): Promise<PostDTO[] | null> {
+    // We check for the user instead of the follow, as we need to see if it's private as well as if it's followed or not
     const author = await this.db.user.findUnique({
       where: {
         id: authorId
@@ -129,15 +130,20 @@ export class PostRepositoryImpl implements PostRepository {
         followers: true
       }
     })
+
     if (!author) return null
+
     // Due to how logical operators are handled, if author isn't private, it won't bother with the second half
     const canUserSeePost = !author.isPrivate || author.followers.some(follower => follower.followerId === userId)
     if (!canUserSeePost) return null
+
     const posts = await this.db.post.findMany({
       where: {
-        authorId
+        authorId,
+        parentId: comments ? { not: null } : null
       }
     })
+
     return posts.map(post => new PostDTO(post))
   }
 }

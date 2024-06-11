@@ -8,6 +8,7 @@ import { BodyValidation, db } from '@utils'
 import { ReactionRepositoryImpl } from '../repository'
 import { ReactionService, ReactionServiceImpl } from '../service'
 import { ReactionDTO, ReactionTypeDTO } from '@domains/reaction/dto'
+import { ReactionType } from '@prisma/client'
 
 export const reactionRouter = Router()
 
@@ -56,4 +57,56 @@ reactionRouter.post('/:post_id', BodyValidation(ReactionTypeDTO), async (req: Re
   const reaction = await service.reactToPost(new ReactionDTO(data.reactionType, userId, postId))
 
   return res.status(HttpStatus.OK).json(reaction)
+})
+
+/**
+ * @swagger
+ * /api/reaction/by_user/{userId}:
+ *   get:
+ *     summary: Get reactions by user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user to retrieve reactions from
+ *       - in: query
+ *         name: reactionType
+ *         schema:
+ *           type: string
+ *           enum: [Like, Retweet]  // Enum values here
+ *         description: Type of reaction to filter by. Defaults to "Like" if not provided.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved reactions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ExtendedReactionDTO'
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+reactionRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { userId: authorId } = req.params
+  const { reactionType } = req.query
+
+  let validReactionType: ReactionType
+
+  if (!(reactionType === null || reactionType === undefined) && typeof reactionType === 'string' && Object.values(ReactionType).includes(reactionType as ReactionType)) {
+    validReactionType = reactionType as ReactionType
+  } else {
+    validReactionType = ReactionType.Like
+  }
+
+  const reactions = await service.getReactionsByAuthor(userId, authorId, validReactionType)
+
+  return res.status(HttpStatus.OK).json(reactions)
 })

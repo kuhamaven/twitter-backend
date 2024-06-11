@@ -38,8 +38,9 @@ export class PostServiceImpl implements PostService {
     return await this.repository.getAllByDatePaginated(userId, useComments, options)
   }
 
-  async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
-    const posts = await this.repository.getByAuthorId(userId, authorId)
+  async getPostsByAuthor (userId: any, authorId: string, comments?: boolean): Promise<PostDTO[]> {
+    const useComments = comments ?? false // Use default value if withComments is not provided
+    const posts = await this.repository.getByAuthorId(userId, useComments, authorId)
     if (!posts) throw new NotFoundException('posts')
     return posts
   }

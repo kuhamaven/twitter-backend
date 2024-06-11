@@ -117,6 +117,11 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
  *         schema:
  *           type: string
  *         description: ID of the user to retrieve posts from
+ *      - in: query
+ *         name: comments
+ *         schema:
+ *           type: boolean
+ *         description: If true only brings comments, if false or missing only brings posts
  *     responses:
  *       200:
  *         description: Successfully retrieved posts
@@ -135,7 +140,11 @@ postRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { userId: authorId } = req.params
 
-  const posts = await service.getPostsByAuthor(userId, authorId)
+  const { withComments } = req.query
+
+  const includeComments = withComments === 'true'
+
+  const posts = await service.getPostsByAuthor(userId, authorId, includeComments)
 
   return res.status(HttpStatus.OK).json(posts)
 })
