@@ -135,18 +135,12 @@ userRouter.delete('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /user/{userId}/presigned-url:
+ * /api/user/presigned-url:
  *   get:
  *     summary: Generate a pre-signed URL for file upload
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the user
  *       - in: query
  *         name: fileType
  *         required: true
@@ -192,7 +186,7 @@ userRouter.delete('/', async (req: Request, res: Response) => {
  *                 message: "Could not generate pre-signed URL"
  *                 error: {}
  */
-userRouter.get('/:userId/presigned-url', async (req: Request, res: Response) => {
+userRouter.get('/presigned-url', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { fileType } = req.query
 

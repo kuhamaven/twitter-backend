@@ -1,5 +1,4 @@
 import AWS from 'aws-sdk'
-import { v4 as uuidv4 } from 'uuid'
 
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -10,7 +9,8 @@ const s3 = new AWS.S3({
 const BUCKET_NAME = process.env.BUCKET_NAME
 
 export const generatePresignedUrl = async (userId: string, fileType: string): Promise<string> => {
-  const key = `profile-pictures/${userId}/${uuidv4()}.${fileType}`
+  const date = Date.now()
+  const key = `profile-pictures/${userId}/${date.toString()}.${fileType}`
   const params = {
     Bucket: BUCKET_NAME,
     Key: key,
