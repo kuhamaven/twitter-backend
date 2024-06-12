@@ -117,8 +117,8 @@ postRouter.get('/:postId', async (req: Request, res: Response) => {
  *         schema:
  *           type: string
  *         description: ID of the user to retrieve posts from
- *      - in: query
- *         name: comments
+ *       - in: query
+ *         name: withComments
  *         schema:
  *           type: boolean
  *         description: If true only brings comments, if false or missing only brings posts

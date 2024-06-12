@@ -77,7 +77,6 @@ reactionRouter.post('/:post_id', BodyValidation(ReactionTypeDTO), async (req: Re
  *         name: reactionType
  *         schema:
  *           type: string
- *           enum: [Like, Retweet]  // Enum values here
  *         description: Type of reaction to filter by. Defaults to "Like" if not provided.
  *     responses:
  *       200:
