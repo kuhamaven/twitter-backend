@@ -69,7 +69,7 @@ userRouter.get('/', async (req: Request, res: Response) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ExtendedUserDTO'
+ *               $ref: '#/components/schemas/UserViewDTO'
  *       500:
  *         description: Internal server error
  */
@@ -235,7 +235,7 @@ userRouter.post('/upload', upload.single('file'), async (req: Request, res: Resp
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ExtendedUserDTO'
+ *               $ref: '#/components/schemas/UserViewDTO'
  *       404:
  *         description: User not found
  *       500:
