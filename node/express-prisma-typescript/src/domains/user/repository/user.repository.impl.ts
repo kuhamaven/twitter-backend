@@ -1,11 +1,12 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { PrismaClient } from '@prisma/client'
 import { OffsetPagination } from '@types'
-import { ExtendedUserDTO, UserDTO } from '../dto'
+import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from './user.repository'
 
 export class UserRepositoryImpl implements UserRepository {
-  constructor (private readonly db: PrismaClient) {}
+  constructor (private readonly db: PrismaClient) {
+  }
 
   async create (data: SignupInputDTO): Promise<UserDTO> {
     return await this.db.user.create({
@@ -57,5 +58,30 @@ export class UserRepositoryImpl implements UserRepository {
       }
     })
     return user ? new ExtendedUserDTO(user) : null
+  }
+
+  async updateUserPicture (userId: string, profilePictureUrl: string): Promise<UserViewDTO | null> {
+    // Find the user
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    // If the user is not found, return null
+    if (!user) return null
+
+    // Update the user's profile picture
+    const updatedUser = await this.db.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        profilePicture: profilePictureUrl
+      }
+    })
+
+    // Return the updated user as a UserDTO
+    return new UserViewDTO(updatedUser)
   }
 }

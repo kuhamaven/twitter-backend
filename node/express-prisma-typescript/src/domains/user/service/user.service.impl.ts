@@ -1,6 +1,6 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserDTO } from '../dto'
+import { UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 
@@ -20,5 +20,11 @@ export class UserServiceImpl implements UserService {
 
   async deleteUser (userId: any): Promise<void> {
     await this.repository.delete(userId)
+  }
+
+  async updateUserPicture (userId: any, profilePictureUrl: any): Promise<UserViewDTO> {
+    const user = await this.repository.updateUserPicture(userId, profilePictureUrl)
+    if (!user) throw new NotFoundException('user')
+    return user
   }
 }
