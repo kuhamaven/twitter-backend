@@ -1,4 +1,4 @@
-import { CreatePostInputDTO, PostDTO } from '../dto'
+import {CreatePostInputDTO, ExtendedPostDTO, PostDTO} from '../dto'
 import { PostRepository } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
@@ -33,14 +33,20 @@ export class PostServiceImpl implements PostService {
     return post
   }
 
-  async getLatestPosts (userId: string, options: CursorPagination, withComments?: boolean): Promise<PostDTO[]> {
+  async getLatestPosts (userId: string, options: CursorPagination, withComments?: boolean): Promise<ExtendedPostDTO[]> {
     const useComments = withComments ?? false // Use default value if withComments is not provided
     return await this.repository.getAllByDatePaginated(userId, useComments, options)
   }
 
-  async getPostsByAuthor (userId: any, authorId: string, comments?: boolean): Promise<PostDTO[]> {
+  async getPostsByAuthor (userId: any, authorId: string, comments?: boolean): Promise<ExtendedPostDTO[]> {
     const useComments = comments ?? false // Use default value if withComments is not provided
     const posts = await this.repository.getByAuthorId(userId, useComments, authorId)
+    if (!posts) throw new NotFoundException('posts')
+    return posts
+  }
+
+  async getByParentId (userId: string, postId: string, options: CursorPagination,): Promise<ExtendedPostDTO[]> {
+    const posts = await this.repository.getByParentId(userId, postId, options)
     if (!posts) throw new NotFoundException('posts')
     return posts
   }

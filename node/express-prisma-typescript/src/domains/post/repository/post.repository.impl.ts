@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client'
+import { Post, PrismaClient, Reaction, ReactionType, User } from '@prisma/client'
 
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {
@@ -32,7 +32,7 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (userId: string, includeComments: boolean, options: CursorPagination): Promise<PostDTO[]> {
+  async getAllByDatePaginated (userId: string, includeComments: boolean, options: CursorPagination): Promise<ExtendedPostDTO[]> {
     let whereCondition: any = {
       OR: [
         {
@@ -70,7 +70,9 @@ export class PostRepositoryImpl implements PostRepository {
     const posts = await this.db.post.findMany({
       where: whereCondition,
       include: {
-        author: true
+        author: true,
+        comments: true,
+        reactions: true
       },
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
@@ -85,7 +87,9 @@ export class PostRepositoryImpl implements PostRepository {
       ]
     })
 
-    return posts.map(post => new PostDTO(post))
+    const extendedPosts = await this.getExtendedPostDto(posts)
+
+    return extendedPosts ?? []
   }
 
   async delete (postId: string): Promise<void> {
@@ -120,7 +124,7 @@ export class PostRepositoryImpl implements PostRepository {
     return canUserSeePost ? new PostDTO(post) : null
   }
 
-  async getByAuthorId (userId: string, comments: boolean, authorId: string): Promise<PostDTO[] | null> {
+  async getByAuthorId (userId: string, comments: boolean, authorId: string): Promise<ExtendedPostDTO[] | null> {
     // We check for the user instead of the follow, as we need to see if it's private as well as if it's followed or not
     const author = await this.db.user.findUnique({
       where: {
@@ -141,9 +145,92 @@ export class PostRepositoryImpl implements PostRepository {
       where: {
         authorId,
         parentId: comments ? { not: null } : null
+      },
+      include: {
+        author: true,
+        comments: true,
+        reactions: true
       }
     })
 
-    return posts.map(post => new PostDTO(post))
+    return await this.getExtendedPostDto(posts)
+  }
+
+  async getByParentId (userId: string, postId: string, options: CursorPagination): Promise<ExtendedPostDTO[] | null> {
+    const { limit, before, after } = options
+
+    const whereCondition: any = {
+      OR: [
+        {
+          author: {
+            isPrivate: false
+          }
+        },
+        {
+          author: {
+            isPrivate: true,
+            followers: {
+              some: {
+                followerId: userId
+              }
+            }
+          }
+        },
+        {
+          author: {
+            isPrivate: true,
+            id: userId
+          }
+        }
+      ],
+      parentId: postId
+    }
+
+    const cursor = after ? { id: after } : before ? { id: before } : undefined
+    const skip = after ?? before ? 1 : undefined
+    const take = limit ? (before ? -limit : limit) : undefined
+
+    const posts = await this.db.post.findMany({
+      where: whereCondition,
+      include: {
+        author: true,
+        reactions: true,
+        comments: true
+      },
+      cursor,
+      skip,
+      take,
+      orderBy: [
+        {
+          reactions: {
+            _count: 'desc'
+          }
+        },
+        {
+          id: 'asc'
+        }
+      ]
+    })
+
+    return await this.getExtendedPostDto(posts)
+  }
+
+  async getExtendedPostDto (posts: Array<Post & { author: User, comments: Post[], reactions: Reaction[] }>): Promise<ExtendedPostDTO[] | null> {
+    const postsWithReactionCount = await Promise.all(posts.map(async (post) => {
+      const qtyComments = post.comments.length
+      const qtyLikes = post.reactions.filter(reaction => reaction.reactionType === ReactionType.Like).length
+      const qtyRetweets = post.reactions.filter(reaction => reaction.reactionType === ReactionType.Retweet).length
+      const totalReactions = post.reactions.length
+
+      return {
+        ...post,
+        qtyComments,
+        qtyLikes,
+        qtyRetweets,
+        totalReactions
+      }
+    }))
+
+    return postsWithReactionCount.map(post => new ExtendedPostDTO(post))
   }
 }

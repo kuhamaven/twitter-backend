@@ -14,13 +14,21 @@ export class UserRepositoryImpl implements UserRepository {
     }).then(user => new UserDTO(user))
   }
 
-  async getById (userId: any): Promise<UserViewDTO | null> {
+  async getById (userId: any): Promise<[UserViewDTO, boolean] | null> {
     const user = await this.db.user.findUnique({
       where: {
         id: userId
+      },
+      include: {
+        follows: true
       }
     })
-    return user ? new UserViewDTO(user) : null
+
+    if (!user) return null
+
+    const followsUser = user.follows.some(follow => follow.followerId === userId)
+
+    return [new UserViewDTO(user), followsUser]
   }
 
   async delete (userId: any): Promise<void> {
@@ -83,5 +91,24 @@ export class UserRepositoryImpl implements UserRepository {
 
     // Return the updated user as a UserDTO
     return new UserViewDTO(updatedUser)
+  }
+
+  async getByUsername (username: any, options: OffsetPagination): Promise<UserViewDTO[] | null> {
+    const users = await this.db.user.findMany({
+      where: {
+        username: {
+          contains: username
+        }
+      },
+      orderBy: [
+        {
+          id: 'asc'
+        }
+      ],
+      take: options.limit ? options.limit : undefined,
+      skip: options.skip ? options.skip : undefined
+    })
+
+    return users.map(user => (user))
   }
 }

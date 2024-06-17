@@ -257,3 +257,81 @@ postRouter.delete('/:postId', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.OK).send(`Deleted post ${postId}`)
 })
+
+/**
+ * @swagger
+ * /api/post/{postId}/comments:
+ *   get:
+ *     summary: Get comments for a post
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the post to get comments for
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Maximum number of comments to return
+ *       - in: query
+ *         name: before
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The cursor pointing to the start of the page of results
+ *       - in: query
+ *         name: after
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The cursor pointing to the end of the page of results
+ *     responses:
+ *       200:
+ *         description: Comments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ExtendedPostDTO'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Bad request"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: object
+ *               example:
+ *                 message: "Internal server error"
+ *                 error: {}
+ */
+postRouter.get('/:postId/comments', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { postId } = req.params
+  const { limit, before, after } = req.query as Record<string, string>
+
+  const comments = await service.getByParentId(userId, postId, { limit: Number(limit), before, after })
+
+  return res.status(HttpStatus.OK).json(comments)
+})

@@ -231,11 +231,18 @@ userRouter.post('/upload', upload.single('file'), async (req: Request, res: Resp
  *         description: ID of the user to retrieve
  *     responses:
  *       200:
- *         description: Successfully retrieved the user
+ *         description: Successfully retrieved the user and followsBack status
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/UserViewDTO'
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   user:
+ *                     $ref: '#/components/schemas/UserViewDTO'
+ *                   followsBack:
+ *                     type: boolean
  *       404:
  *         description: User not found
  *       500:
@@ -246,7 +253,7 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
 
   const user = await service.getUser(otherUserId)
 
-  return res.status(HttpStatus.OK).json(user)
+  return res.status(HttpStatus.OK).json([user, true])
 })
 
 /**
@@ -268,4 +275,76 @@ userRouter.delete('/', async (req: Request, res: Response) => {
   await service.deleteUser(userId)
 
   return res.status(HttpStatus.OK)
+})
+
+/**
+ * @swagger
+ * /api/user/by_username/{username}:
+ *   get:
+ *     summary: Get users by username search
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Username or part of a username to search for
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Maximum number of users to return
+ *       - in: query
+ *         name: skip
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           example: 0
+ *         description: Number of users to skip (pagination)
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ExtendedUserDTO'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Bad request"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: object
+ *               example:
+ *                 message: "Internal server error"
+ *                 error: {}
+ */
+userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
+  const { username } = req.params
+  const { limit, skip } = req.query as Record<string, string>
+
+  const user = await service.getByUsername(username, { limit: Number(limit), skip: Number(skip) })
+
+  return res.status(HttpStatus.OK).json(user)
 })

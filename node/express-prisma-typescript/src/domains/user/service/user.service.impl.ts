@@ -1,13 +1,13 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserDTO, UserViewDTO } from '../dto'
+import { UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
 
-  async getUser (userId: any): Promise<UserViewDTO> {
+  async getUser (userId: any): Promise<[UserViewDTO, boolean]> {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
     return user
@@ -26,5 +26,10 @@ export class UserServiceImpl implements UserService {
     const user = await this.repository.updateUserPicture(userId, profilePictureUrl)
     if (!user) throw new NotFoundException('user')
     return user
+  }
+
+  async getByUsername (username: any, options: OffsetPagination): Promise<UserViewDTO[]> {
+    const users = await this.repository.getByUsername(username, options)
+    return users ?? []
   }
 }
