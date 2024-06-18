@@ -39,6 +39,8 @@ model User {
   followers Follow[] @relation(name: "followers")
   isPrivate Boolean
   reactions Reaction[]
+  messages       Message[]
+  conversations  Conversation[] @relation("UserConversations")
 }
 
 model Follow {
@@ -83,4 +85,25 @@ model Reaction {
 
   reacted Post @relation(name: "reactions", fields: [postId], references: [id], onDelete: Cascade) // One to many
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+}
+
+model Conversation {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+  createdAt DateTime  @default(now())
+
+  members  User[] @relation("UserConversations")
+  messages Message[]
+}
+
+model Message {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  authorId String @db.Uuid // Foreign Key
+  conversationId String @db.Uuid // Foreign Key
+  content  String @db.VarChar(240) // Limit the content to 240 characters
+
+  createdAt DateTime  @default(now())
+
+  author       User         @relation(fields: [authorId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
 }
