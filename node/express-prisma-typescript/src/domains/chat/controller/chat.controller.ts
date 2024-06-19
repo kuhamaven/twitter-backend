@@ -1,23 +1,49 @@
-import { Request, Response, Router } from 'express'
-import HttpStatus from 'http-status'
-// express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
-import 'express-async-errors'
-
+import { Server } from 'socket.io'
 import { db } from '@utils'
-
-import { ChatService, ChatServiceImpl } from '../service'
+import { ChatService, ChatServiceImpl } from '@domains/chat/service'
 import { ChatRepositoryImpl } from '@domains/chat/repository'
 
-export const postRouter = Router()
+export const setupSocketHandlers = (io: Server): void => {
+  const service: ChatService = new ChatServiceImpl(new ChatRepositoryImpl(db))
 
-// Use dependency injection
-const service: ChatService = new ChatServiceImpl(new ChatRepositoryImpl(db))
+  io.on('connection', async (socket) => {
+    console.log('a user connected')
+    io.socketsJoin(socket.id)
+    const { userId } = socket.data.context
+    const conversations = await service.getAllConversationsIds(userId)
+    conversations.forEach(conversation => { io.socketsJoin(conversation) })
 
-postRouter.post('/', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
+    socket.on('disconnect', () => {
+      console.log('user disconnected')
+      io.socketsLeave(socket.id)
+      conversations.forEach(conversation => { io.socketsLeave(conversation) })
+    })
 
-  // Call the service method with the parsed 'includeComments' value
-  const posts = await service.create(userId, 'asdasdsa')
+    socket.on('createConversation', async (data: string): Promise<any> => {
+      const users: string[] = JSON.parse(data)
+      try {
+        const { userId } = socket.data.context
+        const convo = await service.create(userId, users)
+        io.socketsJoin(convo.id)
+      } catch (error) {
+        console.error('Error creating conversation:', error)
+      }
+    })
 
-  return res.status(HttpStatus.OK).json(posts)
-})
+    socket.on('sendMessage', async (data: string): Promise<void> => {
+      const { conversationId, message } = JSON.parse(data)
+      try {
+        const { userId } = socket.data.context
+        const messageDto = await service.sendMessage(userId, conversationId, message)
+
+        io.to(conversationId).emit('receiveMessage', messageDto)
+      } catch (error) {
+        console.error('Error sending message:', error)
+      }
+    })
+
+    socket.on('receiveMessage', (messageDto: any) => {
+      console.log('Received message:', messageDto)
+    })
+  })
+}

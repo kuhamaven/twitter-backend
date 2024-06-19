@@ -97,4 +97,17 @@ export class ChatRepositoryImpl implements ChatRepository {
     const filteredMemberIds = memberIds.filter(memberId => memberId !== userId)
     return await this.userFollowsEveryone(userId, filteredMemberIds)
   }
+
+  async getAllConversationsIds (userId: string): Promise<string[]> {
+    const userWithConversations = await this.db.user.findUnique({
+      where: { id: userId },
+      include: {
+        conversations: true
+      }
+    })
+
+    if (!userWithConversations) return []
+
+    return userWithConversations.conversations.map(conversation => conversation.id)
+  }
 }
