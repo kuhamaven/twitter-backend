@@ -161,7 +161,7 @@ export class ChatRepositoryImpl implements ChatRepository {
 
     const user = conversation.members.filter(member => member.id === userId)
 
-    if (user == null) throw new UnauthorizedException('user is not part of this conversation')
+    if (user == null || user.length === 0) throw new UnauthorizedException('user is not part of this conversation')
 
     return conversation.messages.map(message => {
       return new MessageDTO(message)

@@ -40,9 +40,5 @@ export const setupSocketHandlers = (io: Server): void => {
         io.to(socket.id).emit('error', error)
       }
     })
-
-    socket.on('receiveMessage', (messageDto: any) => {
-      console.log('Received message:', messageDto)
-    })
   })
 }
