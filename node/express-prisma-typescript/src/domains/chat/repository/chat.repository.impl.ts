@@ -2,15 +2,15 @@ import { PrismaClient, ReactionType } from '@prisma/client'
 
 import { ChatRepository } from '.'
 import { ConversationDTO, MessageDTO } from '@domains/chat/dto'
-import {NotFoundException, UnauthorizedException} from "@utils";
+import { NotFoundException, UnauthorizedException } from '@utils'
 
 export class ChatRepositoryImpl implements ChatRepository {
   constructor (private readonly db: PrismaClient) {
   }
 
   async create (userId: string, users: string[]): Promise<ConversationDTO | null> {
-    // Check if the user can start a conversation
-    const canStart = await this.userFollowsEveryone(userId, users)
+    // Check if it is valid to start a conversation
+    const canStart = await this.allUsersFollowEachOther([...users, userId])
 
     if (!canStart) return null
 
@@ -50,6 +50,22 @@ export class ChatRepositoryImpl implements ChatRepository {
     })
 
     return new MessageDTO(newMessage)
+  }
+
+  // Method to check if all users in the list follow each other
+  private async allUsersFollowEachOther (users: string[]): Promise<boolean> {
+    // Iterate over each user and check if they follow all others
+    for (const userId of users) {
+      const remainingUsers = users.filter(user => user !== userId) // Remove the current user
+
+      // Check if the current user follows all remaining users
+      const followsAll = await this.userFollowsEveryone(userId, remainingUsers)
+      if (!followsAll) {
+        return false
+      }
+    }
+
+    return true
   }
 
   // Helper method to check if the user follows all other members
@@ -96,7 +112,7 @@ export class ChatRepositoryImpl implements ChatRepository {
     if (!memberIds.includes(userId)) return false
 
     const filteredMemberIds = memberIds.filter(memberId => memberId !== userId)
-    return await this.userFollowsEveryone(userId, filteredMemberIds)
+    return await this.allUsersFollowEachOther([...filteredMemberIds, userId])
   }
 
   async getAllConversationsIds (userId: string): Promise<string[]> {
