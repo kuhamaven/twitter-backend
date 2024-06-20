@@ -1,13 +1,13 @@
-import { Request, Response, Router } from 'express'
+import {Request, Response, Router} from 'express'
 import HttpStatus from 'http-status'
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors'
 
 import {Constants, db} from '@utils'
 
-import { UserRepositoryImpl } from '../repository'
-import { UserService, UserServiceImpl } from '../service'
-import { generatePresignedUrl } from '@domains/aws/AwsPreSignedHandler'
+import {UserRepositoryImpl} from '../repository'
+import {UserService, UserServiceImpl} from '../service'
+import {generatePresignedUrl} from '@domains/aws/AwsPreSignedHandler'
 import multer from 'multer'
 import axios from 'axios'
 
@@ -83,7 +83,7 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /api/user/presigned-url:
+ * /api/user/presigned_url:
  *   get:
  *     summary: Generate a pre-signed URL for file upload
  *     security:
@@ -134,7 +134,7 @@ userRouter.get('/me', async (req: Request, res: Response) => {
  *                 message: "Could not generate pre-signed URL"
  *                 error: {}
  */
-userRouter.get('/presigned-url', async (req: Request, res: Response) => {
+userRouter.get('/presigned_url', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { fileType } = req.query
 
@@ -148,6 +148,71 @@ userRouter.get('/presigned-url', async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: 'Could not generate pre-signed URL', error })
   }
+})
+
+/**
+ * @swagger
+ * /api/user/profile_picture:
+ *   put:
+ *     summary: Update user profile picture
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: profilePicture
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: URL of the profile picture to set
+ *     responses:
+ *       200:
+ *         description: Profile picture updated successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Profile picture is required and must be a string"
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Not authorized to update profile picture"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: object
+ *               example:
+ *                 message: "Internal server error"
+ *                 error: {}
+ */
+userRouter.put('/profile_picture', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { profilePicture } = req.query
+
+  if (profilePicture == null) {
+    return res.status(400).json({ message: 'Profile picture is required and must be a string' })
+  }
+
+  return await service.updateUserPicture(userId, profilePicture)
 })
 
 /**
