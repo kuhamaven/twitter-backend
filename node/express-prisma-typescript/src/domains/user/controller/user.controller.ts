@@ -318,7 +318,7 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
 
   const user = await service.getUser(otherUserId)
 
-  return res.status(HttpStatus.OK).json([user, true])
+  return res.status(HttpStatus.OK).json(user)
 })
 
 /**
