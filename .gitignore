@@ -4,3 +4,4 @@
 # idea and gradle
 .idea
 node/express-prisma-typescript/.envrc
+/node/node_modules

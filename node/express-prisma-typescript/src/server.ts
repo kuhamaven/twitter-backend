@@ -50,3 +50,5 @@ setupSocketHandlers(io)
 server.listen(Constants.PORT, () => {
   Logger.info(`Server listening on port ${Constants.PORT}`)
 })
+
+export { server }
