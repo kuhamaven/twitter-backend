@@ -1,9 +1,11 @@
-import {PrismaClient, ReactionType} from '@prisma/client'
+import { PrismaClient, ReactionType } from '@prisma/client'
 import { ReactionRepository } from './reaction.repository'
 import { ExtendedReactionDTO, ReactionDTO } from '@domains/reaction/dto'
-import {PostDTO} from "@domains/post/dto";
+import { PostDTO } from '@domains/post/dto'
 
 export class ReactionRepositoryImpl implements ReactionRepository {
+  constructor (private readonly db: PrismaClient) {}
+
   async reactToPost (reactionDto: ReactionDTO): Promise<ExtendedReactionDTO | null> {
     const existingReaction = await this.db.reaction.findFirst({
       where: {
@@ -25,7 +27,26 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     }).then(reaction => new ExtendedReactionDTO(reaction))
   }
 
-  constructor (private readonly db: PrismaClient) {}
+  async deleteReactToPost (reactionDto: ReactionDTO): Promise<ExtendedReactionDTO | null> {
+    const where = {
+      postId: reactionDto.postId,
+      authorId: reactionDto.authorId,
+      reactionType: reactionDto.reactionType
+    }
+
+    const existingReactions = await this.db.reaction.findMany({
+      where
+    })
+
+    // Throw error if reaction not found
+    if (existingReactions.length === 0) return null
+
+    await this.db.reaction.deleteMany({
+      where
+    })
+
+    return new ExtendedReactionDTO(existingReactions[0])
+  }
 
   async getReactionsByAuthor (userId: any, authorId: string, reactionType: ReactionType): Promise<ExtendedReactionDTO[] | null> {
     // We check for the user instead of the follow, as we need to see if it's private as well as if it's followed or not

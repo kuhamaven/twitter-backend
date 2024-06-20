@@ -1,7 +1,7 @@
-import { ChatRepository } from '../repository'
-import { ChatService } from '.'
-import { ConversationDTO, MessageDTO } from '@domains/chat/dto'
-import { UnauthorizedException } from '@utils'
+import {ChatRepository} from '../repository'
+import {ChatService} from '.'
+import {ConversationDTO, MessageDTO} from '@domains/chat/dto'
+import {UnauthorizedException} from '@utils'
 
 export class ChatServiceImpl implements ChatService {
   constructor (private readonly repository: ChatRepository) {}
@@ -19,7 +19,14 @@ export class ChatServiceImpl implements ChatService {
   }
 
   async getAllConversationsIds (userId: string): Promise<string[]> {
-    const conversations = await this.repository.getAllConversationsIds(userId)
-    return conversations
+    return await this.repository.getAllConversationsIds(userId)
+  }
+
+  async getAllConversations (userId: string): Promise<ConversationDTO[]> {
+    return await this.repository.getAllConversations(userId)
+  }
+
+  async getAllMessages (userId: string, conversationId: string): Promise<MessageDTO[]> {
+    return await this.repository.getAllMessages(userId, conversationId)
   }
 }

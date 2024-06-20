@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, ReactionType } from '@prisma/client'
 
 import { ChatRepository } from '.'
 import { ConversationDTO, MessageDTO } from '@domains/chat/dto'
+import {NotFoundException, UnauthorizedException} from "@utils";
 
 export class ChatRepositoryImpl implements ChatRepository {
   constructor (private readonly db: PrismaClient) {
@@ -109,5 +110,45 @@ export class ChatRepositoryImpl implements ChatRepository {
     if (!userWithConversations) return []
 
     return userWithConversations.conversations.map(conversation => conversation.id)
+  }
+
+  async getAllConversations (userId: string): Promise<ConversationDTO[]> {
+    const userWithConversations = await this.db.user.findUnique({
+      where: { id: userId },
+      include: {
+        conversations: {
+          include: {
+            members: true
+          }
+        }
+      }
+    })
+
+    if (!userWithConversations) return []
+
+    return userWithConversations.conversations.map(conversation => {
+      const members = conversation.members.map(member => member.id)
+      return new ConversationDTO(conversation, members)
+    })
+  }
+
+  async getAllMessages (userId: string, conversationId: string): Promise<MessageDTO[]> {
+    const conversation = await this.db.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        members: true,
+        messages: true
+      }
+    })
+
+    if (conversation == null) throw new NotFoundException('conversation')
+
+    const user = conversation.members.filter(member => member.id === userId)
+
+    if (user == null) throw new UnauthorizedException('user is not part of this conversation')
+
+    return conversation.messages.map(message => {
+      return new MessageDTO(message)
+    })
   }
 }

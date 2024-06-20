@@ -109,3 +109,87 @@ reactionRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.OK).json(reactions)
 })
+
+/**
+ * @swagger
+ * /api/reaction/{post_id}:
+ *   delete:
+ *     summary: Delete reaction to a post
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: post_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the post from which to delete the reaction
+ *       - in: body
+ *         required: true
+ *         description: Reaction type object
+ *         schema:
+ *           $ref: '#/components/schemas/ReactionTypeDTO'
+ *     responses:
+ *       200:
+ *         description: Reaction deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ExtendedReactionDTO'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Bad request"
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Not authorized to delete this reaction"
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Reaction not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 error:
+ *                   type: object
+ *               example:
+ *                 message: "Internal server error"
+ *                 error: {}
+ */
+reactionRouter.delete('/:post_id', BodyValidation(ReactionTypeDTO), async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const data = req.body
+  const postId = req.params.post_id
+
+  const reaction = await service.reactToPost(new ReactionDTO(data.reactionType, userId, postId))
+
+  return res.status(HttpStatus.OK).json(reaction)
+})

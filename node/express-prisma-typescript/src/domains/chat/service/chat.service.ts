@@ -4,4 +4,6 @@ export interface ChatService {
   create: (userId: string, users: string[]) => Promise<ConversationDTO>
   sendMessage: (userId: string, conversationId: string, message: string) => Promise<MessageDTO>
   getAllConversationsIds: (userId: string) => Promise<string[]>
+  getAllConversations: (userId: string) => Promise<ConversationDTO[]>
+  getAllMessages: (userId: string, conversationId: string) => Promise<MessageDTO[]>
 }
