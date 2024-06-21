@@ -22,7 +22,8 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@*": ["./*"]
-    }
+    },
+    "types": ["@types/jest", "@quramy/jest-prisma"]
   },
   "lib": ["es2022"],
   "include": ["src/**/*"],

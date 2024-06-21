@@ -1,20 +1,25 @@
-import { AuthService, AuthServiceImpl } from '@domains/auth/service'
+import { describe } from '@jest/globals'
+import { AuthServiceImpl } from '@domains/auth/service'
 import { UserRepositoryImpl } from '@domains/user/repository'
-import { db } from '@utils'
+import { users } from '../data'
 
-describe('test signup', () => {
-  it('should return 200 OK with JSON response', async () => {
-    const service: AuthService = new AuthServiceImpl(new UserRepositoryImpl(db))
+describe('Auth User', () => {
+  const prisma = jestPrisma.client
+  const userRepository = new UserRepositoryImpl(prisma)
+  const authService = new AuthServiceImpl(userRepository)
 
-    const requestBody = {
-      email: 'test@test.com',
-      username: 'test123',
-      password: 'StrongP@ssw0rd',
-      isPrivate: false
+  test('Sign up user successfully should return token and register it', async () => {
+    const user = users[0]
+    const token = await authService.signup(user)
+
+    expect(token.token).not.toBeNull()
+    expect(typeof token.token).toBe('string')
+    expect(token.token).not.toBe('')
+
+    const createdUser = await userRepository.getByUsername(user.username, { limit: Number(1), skip: Number(0) })
+    expect(createdUser).not.toBeNull()
+    if (createdUser) {
+      expect(createdUser[0].username).toEqual(user.username)
     }
-
-    const response = await service.signup(requestBody)
-
-    expect(response.token).not.toBeNull()
   })
 })

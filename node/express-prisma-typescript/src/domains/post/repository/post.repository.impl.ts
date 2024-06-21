@@ -118,7 +118,7 @@ export class PostRepositoryImpl implements PostRepository {
     if (!post) return null
 
     // Check if the post is public or if the user follows the author
-    const canUserSeePost = !post.author.isPrivate || post.author.followers.some(follower => follower.followerId === userId)
+    const canUserSeePost = !post.author.isPrivate || post.authorId === userId || post.author.followers.some(follower => follower.followerId === userId)
 
     // Otherwise, return the post wrapped in PostDTO
     return canUserSeePost ? new PostDTO(post) : null
