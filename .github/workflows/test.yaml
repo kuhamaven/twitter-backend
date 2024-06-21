@@ -25,6 +25,8 @@ jobs:
         run: npm install
         working-directory: node/express-prisma-typescript
 
+      - name: Set up environment variables
+        run: echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
 
       - name: Run tests
         run: npm test
