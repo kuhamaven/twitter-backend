@@ -10,7 +10,7 @@ const swaggerDefinition: SwaggerDefinition = {
   },
   servers: [
     {
-      url: 'http://localhost:' + Constants.PORT,
+      url: Constants.BASE_URL,
       description: 'Development server'
     }
   ],
