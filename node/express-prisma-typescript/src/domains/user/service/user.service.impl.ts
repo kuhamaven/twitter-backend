@@ -3,12 +3,19 @@ import { OffsetPagination } from 'types'
 import { UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
+import { User } from '@prisma/client'
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
 
   async getUser (userId: any): Promise<[UserViewDTO, boolean]> {
     const user = await this.repository.getById(userId)
+    if (!user) throw new NotFoundException('user')
+    return user
+  }
+
+  async getMe (userId: string): Promise<[User, UserViewDTO[], UserViewDTO[]]> {
+    const user = await this.repository.getMe(userId)
     if (!user) throw new NotFoundException('user')
     return user
   }

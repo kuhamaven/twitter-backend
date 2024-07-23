@@ -1,15 +1,16 @@
-import {Request, Response, Router} from 'express'
+import { Request, Response, Router } from 'express'
 import HttpStatus from 'http-status'
 // express-async-errors is a module that handles async errors in express, don't forget import it in your new controllers
 import 'express-async-errors'
 
-import {Constants, db} from '@utils'
+import { Constants, db } from '@utils'
 
-import {UserRepositoryImpl} from '../repository'
-import {UserService, UserServiceImpl} from '../service'
-import {generatePresignedUrl} from '@domains/aws/AwsPreSignedHandler'
+import { UserRepositoryImpl } from '../repository'
+import { UserService, UserServiceImpl } from '../service'
+import { generatePresignedUrl } from '@domains/aws/AwsPreSignedHandler'
 import multer from 'multer'
 import axios from 'axios'
+import { FullUserView } from '@domains/user/dto'
 
 export const userRouter = Router()
 const upload = multer() // Initialize multer
@@ -76,9 +77,9 @@ userRouter.get('/', async (req: Request, res: Response) => {
 userRouter.get('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  const user = await service.getUser(userId)
+  const user = await service.getMe(userId)
 
-  return res.status(HttpStatus.OK).json(user)
+  return res.status(HttpStatus.OK).json(new FullUserView(user[0], user[1], user[2], []))
 })
 
 /**

@@ -1,5 +1,5 @@
 import { SignupInputDTO } from '@domains/auth/dto'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User } from '@prisma/client'
 import { OffsetPagination } from '@types'
 import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto'
 import { UserRepository } from './user.repository'
@@ -29,6 +29,51 @@ export class UserRepositoryImpl implements UserRepository {
     const followsUser = user.follows.some(follow => follow.followerId === userId)
 
     return [new UserViewDTO(user), followsUser]
+  }
+
+  async getMe (userId: string): Promise<[User, UserViewDTO[], UserViewDTO[]] | null> {
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId
+      },
+      include: {
+        follows: true,
+        followers: true
+      }
+    })
+
+    if (!user) return null
+
+    const following = await Promise.all(user.follows.map(async (follow) => {
+      const followedUser = await this.db.user.findUnique({
+        where: {
+          id: follow.followedId
+        }
+      })
+
+      if (followedUser) {
+        return new UserViewDTO(followedUser)
+      }
+      return null
+    }))
+
+    const followers = await Promise.all(user.followers.map(async (follow) => {
+      const followerUser = await this.db.user.findUnique({
+        where: {
+          id: follow.followerId
+        }
+      })
+
+      if (followerUser) {
+        return new UserViewDTO(followerUser)
+      }
+      return null
+    }))
+
+    const filteredFollowing = following.filter(followedUser => followedUser !== null) as UserViewDTO[]
+    const filteredFollowers = followers.filter(followedUser => followedUser !== null) as UserViewDTO[]
+
+    return [user, filteredFollowing, filteredFollowers]
   }
 
   async delete (userId: any): Promise<void> {

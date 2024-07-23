@@ -1,6 +1,7 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { OffsetPagination } from '@types'
-import {ExtendedUserDTO, UserDTO, UserViewDTO} from '../dto'
+import { ExtendedUserDTO, UserDTO, UserViewDTO} from '../dto'
+import { User } from '@prisma/client';
 
 export interface UserRepository {
   create: (data: SignupInputDTO) => Promise<UserDTO>
@@ -10,4 +11,5 @@ export interface UserRepository {
   getByEmailOrUsername: (email?: string, username?: string) => Promise<ExtendedUserDTO | null>
   updateUserPicture: (userId: any, profilePictureUrl: any) => Promise<UserViewDTO | null>
   getByUsername: (username: any, options: OffsetPagination) => Promise<UserViewDTO[] | null>
+  getMe: (userId: string) => Promise<[User, UserViewDTO[], UserViewDTO[]] | null>
 }
