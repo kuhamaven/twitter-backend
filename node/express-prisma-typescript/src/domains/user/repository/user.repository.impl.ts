@@ -53,8 +53,20 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getByEmailOrUsername (email?: string, username?: string): Promise<ExtendedUserDTO | null> {
-    const user = await this.db.user.findFirst({
-      where: {
+    let whereCondition: any = {}
+
+    if (username === null || username === undefined) {
+      if (email?.match('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')) {
+        whereCondition = {
+          email
+        }
+      } else {
+        whereCondition = {
+          username: email
+        }
+      }
+    } else {
+      whereCondition = {
         OR: [
           {
             email
@@ -64,6 +76,10 @@ export class UserRepositoryImpl implements UserRepository {
           }
         ]
       }
+    }
+
+    const user = await this.db.user.findFirst({
+      where: whereCondition
     })
     return user ? new ExtendedUserDTO(user) : null
   }

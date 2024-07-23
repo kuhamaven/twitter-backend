@@ -35,5 +35,5 @@ export class Constants {
   // S3 Bucket
   static REGION_NAME: string = process.env.AWS_REGION ?? 'region'
 
-  static BASE_URL: string = process.env.BASE_URL ?? 'http://localhost:'
+  static BASE_URL: string = process.env.BASE_URL ?? 'http://localhost:' + Constants.PORT
 }

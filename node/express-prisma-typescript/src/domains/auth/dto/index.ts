@@ -33,7 +33,6 @@ export class SignupInputDTO {
 export class LoginInputDTO {
   @IsOptional()
   @IsString()
-  @IsEmail()
   @IsNotEmpty()
     email?: string
 
