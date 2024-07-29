@@ -21,6 +21,7 @@ export class PostDTO {
     this.content = post.content
     this.images = post.images
     this.createdAt = post.createdAt
+    this.parentId = post.parentId
   }
 
   id: string
@@ -28,6 +29,7 @@ export class PostDTO {
   content: string
   images: string[]
   createdAt: Date
+  parentId: string | null
 }
 
 export class ExtendedPostDTO extends PostDTO {
