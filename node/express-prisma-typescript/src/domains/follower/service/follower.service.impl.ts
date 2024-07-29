@@ -10,8 +10,8 @@ export class FollowerServiceImpl implements FollowerService {
     return await this.repository.follow(followDto)
   }
 
-  async unfollow (userId: string, followedId: string): Promise<void> {
+  async unfollow (userId: string, followedId: string): Promise<ExtendFollowDTO> {
     const followDto = new FollowDTO(userId, followedId)
-    await this.repository.unfollow(followDto)
+    return await this.repository.unfollow(followDto)
   }
 }

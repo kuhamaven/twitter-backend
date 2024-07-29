@@ -43,7 +43,7 @@ export class UserViewDTO {
 }
 
 export class FullUserView {
-  constructor (user: User, followers: UserViewDTO[], following: UserViewDTO[], posts: Post[]) {
+  constructor (user: User, following: UserViewDTO[], followers: UserViewDTO[], posts: Post[]) {
     this.id = user.id
     this.name = user.name ?? ''
     this.username = user.username

@@ -70,7 +70,7 @@ userRouter.get('/', async (req: Request, res: Response) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/UserViewDTO'
+ *               $ref: '#/components/schemas/FullUserView'
  *       500:
  *         description: Internal server error
  */

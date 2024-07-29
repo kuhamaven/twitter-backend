@@ -36,7 +36,7 @@ export class FollowerRepositoryImpl implements FollowerRepository {
     throw new Error('Follow couldn\'t be created')
   }
 
-  async unfollow (followDto: FollowDTO): Promise<void> {
+  async unfollow (followDto: FollowDTO): Promise<ExtendFollowDTO> {
     // Find the user that is trying to unfollow
     const user = await this.db.user.findUnique({
       where: {
@@ -70,5 +70,7 @@ export class FollowerRepositoryImpl implements FollowerRepository {
         id: followToDelete.id
       }
     })
+
+    return new ExtendFollowDTO(followToDelete.followerId, followToDelete.followedId, followToDelete.id)
   }
 }

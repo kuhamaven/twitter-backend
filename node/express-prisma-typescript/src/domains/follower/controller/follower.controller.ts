@@ -83,7 +83,7 @@ followerRouter.post('/unfollow/:user_id', async (req: Request, res: Response) =>
   const followedId = req.params.user_id
   if (userId === followedId) return res.status(HttpStatus.BAD_REQUEST).json("Users can't follow themselves")
 
-  await service.unfollow(userId, followedId)
+  const followDTO = await service.unfollow(userId, followedId)
 
-  return res.status(HttpStatus.OK)
+  return res.status(HttpStatus.OK).json(followDTO)
 })
