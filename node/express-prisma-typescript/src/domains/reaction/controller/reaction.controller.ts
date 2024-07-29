@@ -123,12 +123,13 @@ reactionRouter.get('/by_user/:userId', async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the post from which to delete the reaction
- *       - in: body
- *         required: true
- *         description: Reaction type object
- *         schema:
- *           $ref: '#/components/schemas/ReactionTypeDTO'
+ *         description: ID of the post to delete a reaction from
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ReactionTypeDTO'
  *     responses:
  *       200:
  *         description: Reaction deleted successfully
@@ -189,7 +190,7 @@ reactionRouter.delete('/:post_id', BodyValidation(ReactionTypeDTO), async (req: 
   const data = req.body
   const postId = req.params.post_id
 
-  const reaction = await service.reactToPost(new ReactionDTO(data.reactionType, userId, postId))
+  const reaction = await service.deleteReactToPost(new ReactionDTO(data.reactionType, userId, postId))
 
   return res.status(HttpStatus.OK).json(reaction)
 })

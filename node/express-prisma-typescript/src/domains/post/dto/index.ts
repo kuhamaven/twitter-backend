@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
-import { ExtendedUserDTO } from '@domains/user/dto'
-import {Reaction} from "@prisma/client";
+import { UserViewDTO } from '@domains/user/dto'
+import { ExtendedReactionDTO } from '@domains/reaction/dto'
+import {User} from "@prisma/client";
 
 export class CreatePostInputDTO {
   @IsString()
@@ -30,18 +31,18 @@ export class PostDTO {
 }
 
 export class ExtendedPostDTO extends PostDTO {
-  constructor (post: ExtendedPostDTO) {
+  constructor (post: ExtendedPostDTO, user: User) {
     super(post)
-    this.author = post.author
+    this.author = new UserViewDTO(user)
     this.qtyComments = post.qtyComments
     this.qtyLikes = post.qtyLikes
     this.qtyRetweets = post.qtyRetweets
     this.reactions = post.reactions
   }
 
-  author!: ExtendedUserDTO
+  author!: UserViewDTO
   qtyComments!: number
   qtyLikes!: number
   qtyRetweets!: number
-  reactions: Reaction[]
+  reactions: ExtendedReactionDTO[]
 }

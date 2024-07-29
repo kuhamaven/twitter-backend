@@ -100,7 +100,7 @@ export class PostRepositoryImpl implements PostRepository {
     })
   }
 
-  async getById (userId: string, postId: string): Promise<PostDTO | null> {
+  async getById (userId: string, postId: string): Promise<ExtendedPostDTO | null> {
     const post = await this.db.post.findUnique({
       where: {
         id: postId
@@ -110,7 +110,9 @@ export class PostRepositoryImpl implements PostRepository {
           include: {
             followers: true
           }
-        }
+        },
+        comments: true,
+        reactions: true
       }
     })
 
@@ -120,8 +122,9 @@ export class PostRepositoryImpl implements PostRepository {
     // Check if the post is public or if the user follows the author
     const canUserSeePost = !post.author.isPrivate || post.authorId === userId || post.author.followers.some(follower => follower.followerId === userId)
 
-    // Otherwise, return the post wrapped in PostDTO
-    return canUserSeePost ? new PostDTO(post) : null
+    const extendedPosts = await this.getExtendedPostDto([post])
+
+    return (canUserSeePost && extendedPosts !== null) ? extendedPosts[0] : null
   }
 
   async getByAuthorId (userId: string, comments: boolean, authorId: string): Promise<ExtendedPostDTO[] | null> {
@@ -216,6 +219,7 @@ export class PostRepositoryImpl implements PostRepository {
   }
 
   async getExtendedPostDto (posts: Array<Post & { author: User, comments: Post[], reactions: Reaction[] }>): Promise<ExtendedPostDTO[] | null> {
+    if (posts.length <= 0) return null
     const postsWithReactionCount = await Promise.all(posts.map(async (post) => {
       const qtyComments = post.comments.length
       const qtyLikes = post.reactions.filter(reaction => reaction.reactionType === ReactionType.Like).length
@@ -231,6 +235,6 @@ export class PostRepositoryImpl implements PostRepository {
       }
     }))
 
-    return postsWithReactionCount.map(post => new ExtendedPostDTO(post))
+    return postsWithReactionCount.map(post => new ExtendedPostDTO(post, post.author))
   }
 }
