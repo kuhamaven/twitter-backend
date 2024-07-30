@@ -10,7 +10,7 @@ export class UserServiceImpl implements UserService {
   async getUser (userId: any): Promise<[FullUserView, boolean]> {
     const user = await this.repository.getFullUser(userId, false)
     if (!user) throw new NotFoundException('user')
-    const follows = user.following.some(f => f.id === userId) !== undefined
+    const follows = user.following.some(f => f.id === userId)
     return [user, follows]
   }
 
