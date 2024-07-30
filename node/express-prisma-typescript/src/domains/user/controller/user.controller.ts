@@ -10,7 +10,6 @@ import { UserService, UserServiceImpl } from '../service'
 import { generatePresignedUrl } from '@domains/aws/AwsPreSignedHandler'
 import multer from 'multer'
 import axios from 'axios'
-import { FullUserView } from '@domains/user/dto'
 
 export const userRouter = Router()
 const upload = multer() // Initialize multer
@@ -79,7 +78,7 @@ userRouter.get('/me', async (req: Request, res: Response) => {
 
   const user = await service.getMe(userId)
 
-  return res.status(HttpStatus.OK).json(new FullUserView(user[0], user[1], user[2], []))
+  return res.status(HttpStatus.OK).json(user)
 })
 
 /**

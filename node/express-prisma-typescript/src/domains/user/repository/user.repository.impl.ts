@@ -1,8 +1,9 @@
 import { SignupInputDTO } from '@domains/auth/dto'
 import { PrismaClient, User } from '@prisma/client'
 import { OffsetPagination } from '@types'
-import { ExtendedUserDTO, UserDTO, UserViewDTO } from '../dto'
+import {ExtendedUserDTO, FullUserView, FullUserViewWithPosts, UserDTO, UserViewDTO} from '../dto'
 import { UserRepository } from './user.repository'
+import {posts} from "@tests/data";
 
 export class UserRepositoryImpl implements UserRepository {
   constructor (private readonly db: PrismaClient) {
@@ -31,14 +32,15 @@ export class UserRepositoryImpl implements UserRepository {
     return [new UserViewDTO(user), followsUser]
   }
 
-  async getMe (userId: string): Promise<[User, UserViewDTO[], UserViewDTO[]] | null> {
+  async getFullUser (userId: string, withPosts: boolean): Promise<FullUserViewWithPosts | null> {
     const user = await this.db.user.findUnique({
       where: {
         id: userId
       },
       include: {
         follows: true,
-        followers: true
+        followers: true,
+        posts: withPosts
       }
     })
 
@@ -73,7 +75,7 @@ export class UserRepositoryImpl implements UserRepository {
     const filteredFollowing = following.filter(followedUser => followedUser !== null) as UserViewDTO[]
     const filteredFollowers = followers.filter(followedUser => followedUser !== null) as UserViewDTO[]
 
-    return [user, filteredFollowing, filteredFollowers]
+    return new FullUserViewWithPosts(user, filteredFollowing, filteredFollowers, withPosts ? user.posts : [])
   }
 
   async delete (userId: any): Promise<void> {

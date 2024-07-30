@@ -156,7 +156,7 @@ export class PostRepositoryImpl implements PostRepository {
       }
     })
 
-    return await this.getExtendedPostDto(posts)
+    return posts.length <= 0 ? [] : await this.getExtendedPostDto(posts)
   }
 
   async getByParentId (userId: string, postId: string, options: CursorPagination): Promise<ExtendedPostDTO[] | null> {
